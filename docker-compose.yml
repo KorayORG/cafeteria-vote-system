@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - '27017:27017'
+  backend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./apps/backend:/app
+    command: sh -c "pnpm install && pnpm run start:dev"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/cafeteria
+      - JWT_SECRET=supersecret
+    depends_on:
+      - mongo
+    ports:
+      - '3000:3000'
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./apps/frontend:/app
+    command: sh -c "pnpm install && pnpm run dev"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+    ports:
+      - '3001:3000'
+volumes:
+  mongo-data:
