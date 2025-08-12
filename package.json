@@ -1,0 +1,10 @@
+{
+  "name": "cafeteria-vote-system",
+  "private": true,
+  "packageManager": "pnpm@8.15.4",
+  "scripts": {
+    "dev:backend": "pnpm --filter @cafeteria/backend run start:dev",
+    "dev:frontend": "pnpm --filter @cafeteria/frontend run dev",
+    "test": "pnpm --filter @cafeteria/backend run test"
+  }
+}
