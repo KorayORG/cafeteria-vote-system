@@ -12,7 +12,7 @@ export class AuthService {
     if (existing) throw new ConflictException('Kullanıcı mevcut');
     const passwordHash = await argon2.hash(password);
     const user = await this.users.create({ identityNumber, fullName, phone, passwordHash });
-    return { id: user._id };
+    return { id: user.id };
   }
 
   async validate(identityNumber: string, password: string) {
@@ -25,7 +25,7 @@ export class AuthService {
 
   async login(identityNumber: string, password: string) {
     const user = await this.validate(identityNumber, password);
-    const payload = { sub: user._id.toString(), role: user.role };
+    const payload = { sub: user.id, role: user.role };
     return { accessToken: this.jwt.sign(payload) };
   }
 }

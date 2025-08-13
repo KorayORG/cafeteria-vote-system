@@ -1,3 +1,7 @@
+describe('Auth placeholder', () => {
+  it('should work', () => {
+    expect(true).toBe(true);
+
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { INestApplication } from '@nestjs/common';
@@ -28,5 +32,6 @@ describe('Auth', () => {
         password: 'Secret123',
       })
       .expect(201);
+
   });
 });

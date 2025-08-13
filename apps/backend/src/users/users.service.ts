@@ -7,11 +7,11 @@ import { User, UserDocument } from './user.schema';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async findByIdentity(identityNumber: string): Promise<User | null> {
+  async findByIdentity(identityNumber: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ identityNumber }).exec();
   }
 
-  async create(data: Partial<User>): Promise<User> {
+  async create(data: Partial<User>): Promise<UserDocument> {
     const created = new this.userModel(data);
     return created.save();
   }
