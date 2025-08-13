@@ -1,16 +1,16 @@
-import { IsString, Length } from 'class-validator';
+import { IsString, MinLength } from 'class-validator'
 
 export class RegisterDto {
   @IsString()
-  identityNumber: string;
+  identityNumber!: string
 
   @IsString()
-  fullName: string;
+  fullName!: string
 
   @IsString()
-  phone: string;
+  phone!: string
 
   @IsString()
-  @Length(6, 100)
-  password: string;
+  @MinLength(6)
+  password!: string
 }
