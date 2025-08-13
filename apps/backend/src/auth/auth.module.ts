@@ -1,17 +1,11 @@
-import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { UsersModule } from '../users/users.module';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
+import { Module } from '@nestjs/common'
+import { AuthController } from './auth.controller'
+import { AuthService } from './auth.service'
+// Make sure the path and file name are correct; adjust as needed:
+import { UsersModule } from '../users/users.module'
 
 @Module({
-  imports: [
-    UsersModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'change_me',
-      signOptions: { expiresIn: '15m' },
-    }),
-  ],
+  imports: [UsersModule],
   controllers: [AuthController],
   providers: [AuthService],
 })

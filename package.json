@@ -6,5 +6,15 @@
     "dev:backend": "pnpm --filter @cafeteria/backend run start:dev",
     "dev:frontend": "pnpm --filter @cafeteria/frontend run dev",
     "test": "pnpm --filter @cafeteria/backend run test"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.1",
+    "@nestjs/common": "^11.1.6",
+    "framer-motion": "^12.23.12"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11"
   }
 }
