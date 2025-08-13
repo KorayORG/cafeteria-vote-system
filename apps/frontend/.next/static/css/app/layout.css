@@ -476,13 +476,12 @@ video {
 
 /* Global */
 html { scroll-behavior: smooth; }
-body {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 250 251 / var(--tw-bg-opacity));
-  --tw-text-opacity: 1;
-  color: rgb(17 24 39 / var(--tw-text-opacity));
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; line-height: 1.6;
+body { 
+	background-color: rgb(249 250 251);
+	color: rgb(17 24 39);
+	-webkit-font-smoothing: antialiased;
+	font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
+	line-height: 1.6;
 }
 
 /* Headings */
