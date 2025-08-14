@@ -1,28 +1,32 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards, Req } from '@nestjs/common'
 import { SuggestionsService } from './suggestions.service'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { Roles } from '../auth/roles.decorator'
+import { RolesGuard } from '../auth/roles.guard'
 
 @Controller('suggestions')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class SuggestionsController {
   constructor(private readonly svc: SuggestionsService) {}
 
-  // Üye: 300 karaktere kadar mesaj
   @Post()
-  create(@Body() body: { userId: string; message: string }) {
+  @Roles('Üye','Mutfak','Admin')
+  create(@Req() req: any, @Body() body: { message: string }) {
+    const user = req.user
     if (!body?.message || body.message.length > 300) {
       return { ok: false, message: 'Mesaj 1-300 karakter olmalı' }
     }
-    return this.svc.create(body.userId, body.message)
+    return this.svc.create(user.sub, body.message)
   }
 
-  // Mutfak/Admin: Listeleme (okundu/okunmadı filtresi opsiyonel)
-  // /suggestions?isRead=true|false
   @Get()
+  @Roles('Mutfak','Admin')
   list(@Query('isRead') isRead?: 'true'|'false') {
     return this.svc.list(isRead)
   }
 
-  // Mutfak/Admin: Görüldü olarak işaretle
   @Patch(':id/read')
+  @Roles('Mutfak','Admin')
   markRead(@Param('id') id: string, @Body() body?: { isRead?: boolean }) {
     return this.svc.markRead(id, body?.isRead ?? true)
   }

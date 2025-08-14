@@ -1,10 +1,6 @@
 export const COMMON_SCHEMA_OPTIONS = {
-  collection: 'cafeteria',       // ↩️ tek koleksiyon
+  collection: 'cafeteria',  // tüm dokümanlar aynı koleksiyona yazılacak
   timestamps: true,
-}
+};
 
-export type DocType =
-  | 'user'
-  | 'vote'
-  | 'suggestion'
-  | 'menu';
+export type DocType = 'user' | 'vote' | 'suggestion' | 'menu';
