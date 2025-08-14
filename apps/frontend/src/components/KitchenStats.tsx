@@ -1,6 +1,7 @@
 // KitchenStats: Haftalık istatistikler, week picker, charts
 'use client';
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
@@ -44,8 +45,13 @@ export default function KitchenStats({ week, setWeek }) {
   }
 
   return (
-    <Card className="mb-6">
-      <CardContent className="p-6">
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="mb-6"
+    >
+      <div className="card p-6 shadow-soft bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/30 dark:border-gray-800/60">
         <div className="flex items-center justify-between mb-4">
           <Button variant="outline" onClick={prevWeek}>Önceki Hafta</Button>
           <div className="font-semibold text-lg">Hafta: {isoWeek}</div>
@@ -59,18 +65,26 @@ export default function KitchenStats({ week, setWeek }) {
               <XAxis dataKey="date" tickFormatter={d => format(parseISO(d), 'EEE', { locale: tr })} />
               <YAxis allowDecimals={false} />
               <Tooltip formatter={(v) => v} />
-              <Bar dataKey="traditionalCount" fill="#fb923c">
+              <Bar dataKey="traditionalCount" radius={[8,8,0,0]} fill="url(#trad-grad)">
                 <LabelList dataKey="traditionalCount" position="top" />
               </Bar>
-              <Bar dataKey="alternativeCount" fill="#22c55e">
+              <Bar dataKey="alternativeCount" radius={[8,8,0,0]} fill="url(#alt-grad)">
                 <LabelList dataKey="alternativeCount" position="top" />
               </Bar>
-              {/* Overlay for adjustments if present */}
-              {/* Add more overlays/labels as needed */}
+              <defs>
+                <linearGradient id="trad-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#fb923c" stopOpacity={0.95} />
+                  <stop offset="100%" stopColor="#fb923c" stopOpacity={0.65} />
+                </linearGradient>
+                <linearGradient id="alt-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#22c55e" stopOpacity={0.95} />
+                  <stop offset="100%" stopColor="#22c55e" stopOpacity={0.65} />
+                </linearGradient>
+              </defs>
             </BarChart>
           </ResponsiveContainer>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </motion.div>
   );
 }

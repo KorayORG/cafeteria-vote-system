@@ -1,51 +1,99 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Global */
-html { scroll-behavior: smooth; }
-body {
-  @apply bg-gray-50 text-gray-900 antialiased;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
-  line-height: 1.6;
+/* =========== Design Tokens (CSS vars) =========== */
+:root{
+  /* Renkler (RGB) */
+  --bg: 245 247 250;          /* arka plan açık */
+  --card: 255 255 255;        /* kart */
+  --text: 21 29 41;           /* koyu metin */
+  --muted: 100 116 139;       /* gri metin */
+  --primary: 30 64 175;       /* lacivert ton */
+  --accent: 59 130 246;       /* mavi */
+  --orange: 249 115 22;       /* geleneksel turuncu */
+  --green: 5 150 105;         /* alternatif koyu yeşil */
+  --radius: 16px;
 }
 
-/* Headings */
-h1,h2,h3,h4,h5,h6 { @apply font-bold tracking-tight text-gray-800; }
-h1 { @apply text-4xl md:text-5xl; }
-h2 { @apply text-3xl md:text-4xl; }
-h3 { @apply text-2xl md:text-3xl; }
+.dark {
+  --bg: 15 18 24;
+  --card: 21 24 32;
+  --text: 237 242 247;
+  --muted: 148 163 184;
+  --primary: 99 102 241;
+  --accent: 59 130 246;
+}
 
-/* Links */
-a { @apply text-blue-600 hover:text-blue-800 transition-colors duration-200; }
+/* =========== Base =========== */
+html,body{
+  height:100%;
+}
+body{
+  @apply bg-[rgb(var(--bg))] text-[rgb(var(--text))] antialiased;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
 
-/* Buttons */
-.btn { @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium shadow-sm transition-all duration-200; }
-.btn-primary { @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-400; }
-.btn-secondary { @apply bg-gray-200 text-gray-800 hover:bg-gray-300; }
+/* =========== Yardımcı UI sınıfları =========== */
+.container-p{
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+}
 
-/* Cards */
-.card { @apply bg-white rounded-xl shadow-sm p-6 transition-transform hover:scale-[1.02] hover:shadow-lg; }
+.card{
+  @apply bg-[rgb(var(--card))] rounded-2xl border border-black/5 shadow-soft p-5;
+}
 
-/* Forms */
-input, select, textarea { @apply border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent; }
+.btn{
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium 
+  transition active:scale-[.98] border border-transparent;
+}
+.btn-primary{
+  @apply btn bg-[rgb(var(--primary))] text-white hover:brightness-110;
+}
+.btn-secondary{
+  @apply btn bg-white text-[rgb(var(--text))] border-black/10 hover:bg-gray-50;
+}
+.btn-ghost{
+  @apply btn bg-transparent text-[rgb(var(--text))] hover:bg-black/5;
+}
 
-/* Animations */
-.fade-in { animation: fadeIn .6s ease-in-out forwards; }
-@keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+.badge{
+  @apply inline-flex items-center rounded-full text-xs px-2.5 py-1 border;
+}
+.badge-orange{
+  @apply badge border-orange-500/30 text-orange-600 bg-orange-50;
+}
+.badge-green{
+  @apply badge border-emerald-600/30 text-emerald-700 bg-emerald-50;
+}
+
+/* Input’lar */
+.input{
+  @apply w-full rounded-xl border border-black/10 bg-white px-3 py-2 outline-none 
+  focus:border-[rgb(var(--accent))] focus:ring-2 focus:ring-[rgb(var(--accent))]/30;
+}
+.textarea{
+  @apply input min-h-[96px];
+}
+
+/* Basit skeleton */
+.skeleton{
+  @apply animate-pulse bg-black/10 rounded-lg;
+}
+
+/* Animasyonlar */
+.fade-in { animation: fadeIn .6s cubic-bezier(.4,0,.2,1) forwards; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(16px) scale(.98); } to { opacity:1; transform: translateY(0) scale(1); } }
+
+/* Micro-interactions */
+.card:active, .btn:active {
+  @apply scale-95;
+  filter: brightness(0.98);
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar{ width:8px; height:8px }
-::-webkit-scrollbar-track{ background:#f1f1f1 }
-::-webkit-scrollbar-thumb{ background:#888; border-radius:4px }
-::-webkit-scrollbar-thumb:hover{ background:#555 }
-
-@layer base {
-  :root { --background: 0 0% 100%; --foreground: 0 0% 3.9%; --card: 0 0% 100%; --card-foreground: 0 0% 3.9%; --popover: 0 0% 100%; --popover-foreground: 0 0% 3.9%; --primary: 0 0% 9%; --primary-foreground: 0 0% 98%; --secondary: 0 0% 96.1%; --secondary-foreground: 0 0% 9%; --muted: 0 0% 96.1%; --muted-foreground: 0 0% 45.1%; --accent: 0 0% 96.1%; --accent-foreground: 0 0% 9%; --destructive: 0 84.2% 60.2%; --destructive-foreground: 0 0% 98%; --border: 0 0% 89.8%; --input: 0 0% 89.8%; --ring: 0 0% 3.9%; --chart-1: 12 76% 61%; --chart-2: 173 58% 39%; --chart-3: 197 37% 24%; --chart-4: 43 74% 66%; --chart-5: 27 87% 67%; --radius: 0.5rem; }
-  .dark { --background: 0 0% 3.9%; --foreground: 0 0% 98%; --card: 0 0% 3.9%; --card-foreground: 0 0% 98%; --popover: 0 0% 3.9%; --popover-foreground: 0 0% 98%; --primary: 0 0% 98%; --primary-foreground: 0 0% 9%; --secondary: 0 0% 14.9%; --secondary-foreground: 0 0% 98%; --muted: 0 0% 14.9%; --muted-foreground: 0 0% 63.9%; --accent: 0 0% 14.9%; --accent-foreground: 0 0% 98%; --destructive: 0 62.8% 30.6%; --destructive-foreground: 0 0% 98%; --border: 0 0% 14.9%; --input: 0 0% 14.9%; --ring: 0 0% 83.1%; --chart-1: 220 70% 50%; --chart-2: 160 60% 45%; --chart-3: 30 80% 55%; --chart-4: 280 65% 60%; --chart-5: 340 75% 55%; } }
-
-@layer base {
-  * {
-    @apply border-border; }
-  body {
-    @apply bg-background text-foreground; } }
+::-webkit-scrollbar-track{ background:rgba(251,146,60,0.08) }
+::-webkit-scrollbar-thumb{ background:rgba(34,197,94,0.18); border-radius:4px }
+::-webkit-scrollbar-thumb:hover{ background:rgba(34,197,94,0.32) }

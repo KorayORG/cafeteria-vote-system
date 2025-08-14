@@ -1,13 +1,14 @@
+"use client";
+import { logTelemetry } from '@/lib/telemetry';
 // VoteStepper: handles fetching menu, stepper UI, voting logic
-'use client';
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useLocalStorage } from '@/lib/useLocalStorage';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { format, isAfter, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale/tr';
+import { DuelPicker, shuffleSides } from '@/components/DuelPicker';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -19,6 +20,7 @@ function getTodayISO() {
 export default function VoteStepper({ shift, onSuccess, onError, audioEnabled, setAudioEnabled }) {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [pairs, setPairs] = useState<any[]>([]); // randomized pairs for each day
   const { data, isLoading } = useQuery({
     queryKey: ['menu', 'current'],
     queryFn: async () => {
@@ -32,6 +34,40 @@ export default function VoteStepper({ shift, onSuccess, onError, audioEnabled, s
   const [votes, setVotes] = useLocalStorage(`vote:${weekOf}:${shift}`, []);
   const cutoff = data?.cutoffTime || '15:00';
 
+  // Randomize pairs once per week/shift
+  useEffect(() => {
+    if (!days.length) return;
+    const newPairs = days.map(d => shuffleSides(
+      {
+        id: d.traditional?._id || 'traditional',
+        label: 'Geleneksel',
+        name: d.traditional?.name || '-',
+        imageUrl: d.traditional?.imageUrl,
+        tags: d.traditional?.tags || [],
+      },
+      {
+        id: d.alternative?._id || 'alternative',
+        label: 'Alternatif',
+        name: d.alternative?.name || '-',
+        imageUrl: d.alternative?.imageUrl,
+        tags: d.alternative?.tags || [],
+      }
+    ));
+    setPairs(newPairs);
+    // Log impression for each pair
+    newPairs.forEach((pair, i) => {
+      logTelemetry({
+        type: 'impression',
+        date: days[i].date,
+        shift,
+        side: pair.left.label === 'Geleneksel' ? 'left' : 'right',
+        week: weekOf,
+        timestamp: Date.now(),
+      });
+    });
+    // eslint-disable-next-line
+  }, [weekOf, shift, days.length]);
+
   // Helper: is voting open for a date?
   function isVoteOpen(dateISO) {
     const now = new Date();
@@ -41,13 +77,38 @@ export default function VoteStepper({ shift, onSuccess, onError, audioEnabled, s
     return isAfter(date, now);
   }
 
-  function handleSelect(choice) {
+
+  // Optimistic pick handler
+  async function handlePick(choice: 'traditional'|'alternative', meta: { side: 'left'|'right' }) {
     const day = days[step];
     if (!day) return;
     setVotes(vs => {
       const rest = vs.filter(v => v.date !== day.date);
-      return [...rest, { date: day.date, choice }];
+      return [...rest, { date: day.date, choice, side: meta.side }];
     });
+    // Telemetry: log pick
+    logTelemetry({
+      type: 'pick',
+      date: day.date,
+      shift,
+      side: meta.side,
+      choice,
+      week: weekOf,
+      timestamp: Date.now(),
+    });
+    // Prefetch next image
+    if (pairs[step+1]) {
+      [pairs[step+1].left, pairs[step+1].right].forEach(opt => {
+        if (opt.imageUrl) {
+          const img = new window.Image();
+          img.src = opt.imageUrl;
+        }
+      });
+    }
+    // Go to next day after short delay
+    setTimeout(() => {
+      if (step < days.length - 1) setStep(step + 1);
+    }, 350);
   }
 
   async function handleSubmit() {
@@ -83,8 +144,9 @@ export default function VoteStepper({ shift, onSuccess, onError, audioEnabled, s
   if (!days.length) return <div>Menü bulunamadı.</div>;
 
   const day = days[step];
-  const selected = votes.find(v => v.date === day.date)?.choice;
-  const voteOpen = isVoteOpen(day.date);
+  const pair = pairs[step];
+  const selected = votes.find(v => v.date === day?.date)?.choice;
+  const voteOpen = day ? isVoteOpen(day.date) : false;
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto mt-8">
@@ -100,36 +162,15 @@ export default function VoteStepper({ shift, onSuccess, onError, audioEnabled, s
           </button>
         ))}
       </div>
-      {/* Main cards */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18 }}
-          className="flex gap-4 w-full"
-        >
-          {[{ type: 'traditional', dish: day.traditional, badge: 'badge-orange', label: 'Geleneksel' }, { type: 'alternative', dish: day.alternative, badge: 'badge-green', label: 'Alternatif' }].map(opt => (
-            <Card
-              key={opt.type}
-              className={`flex-1 cursor-pointer border-2 transition-all ${selected === opt.type ? 'border-primary scale-105' : 'border-transparent hover:border-muted-foreground'}`}
-              onClick={() => voteOpen && handleSelect(opt.type)}
-              aria-disabled={!voteOpen}
-            >
-              <CardContent className="flex flex-col items-center p-4 gap-2">
-                <span className={`badge ${opt.badge}`}>{opt.label}</span>
-                <span className="font-bold text-lg text-center">{opt.dish?.name || '-'}</span>
-                {opt.dish?.imageUrl && <img src={opt.dish.imageUrl} alt={opt.dish.name} className="w-20 h-20 object-cover rounded" />}
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {opt.dish?.tags?.map(tag => <span key={tag} className="badge badge-outline text-xs">{tag}</span>)}
-                  {opt.dish?.pairTags?.map(pt => <span key={pt.key} className="badge badge-outline text-xs">{pt.left}/{pt.right}</span>)}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </motion.div>
-      </AnimatePresence>
+      {/* Main cards: DuelPicker */}
+      {pair && (
+        <DuelPicker
+          pair={pair}
+          onPick={voteOpen ? handlePick : () => {}}
+          prevChoice={selected}
+          disabled={!voteOpen}
+        />
+      )}
       {/* Footer */}
       <div className="flex flex-col items-center gap-2 w-full">
         <div className="text-sm text-muted-foreground mb-1">Seçili vardiya: <b>{shift}</b> ({data.shiftLabel || ''})</div>
@@ -140,7 +181,7 @@ export default function VoteStepper({ shift, onSuccess, onError, audioEnabled, s
         <Button
           className="mt-4 w-full"
           onClick={handleSubmit}
-          disabled={submitting || votes.length === 0}
+          disabled={submitting || votes.length < days.length}
         >
           {submitting ? 'Gönderiliyor...' : 'Oylamayı Tamamla'}
         </Button>

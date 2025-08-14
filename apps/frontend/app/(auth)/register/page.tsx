@@ -20,7 +20,11 @@ export default function RegisterPage() {
   const router = useRouter()
   const onSubmit = async (data: Form) => {
     setErr(undefined)
-    const res = await api('/auth/register', { method: 'POST', body: data })
+    const res = await api('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' }
+    })
     if (!res.ok) { setErr((await res.json()).message || 'Kayıt başarısız'); return }
     router.push('/login')
   }
